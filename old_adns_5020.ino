@@ -18,7 +18,7 @@ void setup(){
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   //start a serial port for debugging
-  Serial.begin(115200);
+  Serial.begin(57600);
   delay(1000);
   Serial.println("startup complete");
 }
@@ -30,51 +30,29 @@ void loop(){
   digitalWrite(nReset,HIGH);
   delay(1000);
   
-//  pixel_grab();
-//  delay(1000);  
-
-//  while(1){
-//    delay(100);
-//    Serial.println(String(squal()));
-//  }
-
   while(1){
     unsigned int motion = 0;
     //check for movement
     //read motion register, 0x02
     motion = ADNS_read(0x02);
     if(motion > 127){
-      //there has been a motion!
-      //print the x and y movements
-      
-      /* 
-          The original code provided by the author of this library included this line
-          for displaying results, but casting the results with String(...) mishandles
-          the twos complement results for positive or negative displacement in x and y:
-          
-            Serial.println("X:" + String(ADNS_read(0x03)) + " Y:" + String(ADNS_read(0x04)));
-      */
-      
-      /*
-          So I added this block of code which gets it right
-      */
-              
+      //there has been motion!             
       uint8_t dx_raw = ADNS_read(0x03);
       int8_t dx = int8_t(dx_raw);
       uint8_t dy_raw = ADNS_read(0x04);
       int8_t dy = int8_t(dy_raw);
       
       uint8_t sq = squal();
+
+      //write the msg to serial
+      Serial.println("@@@@");    //msg_break
+      Serial.println(sq);      
       
-      char buf[80];
-      sprintf(buf, "X: %d\tY: %d\tSqual: %d", dx, dy, sq);
-      Serial.println(buf);
-      
-      pixel_grab();
-    }
-    
-  }
-}
+      pixel_write();
+      delay(50);                //let the serial port catch up  
+    } //if 
+  }  //while
+}  //loop
 
 
 
@@ -83,24 +61,17 @@ unsigned int squal(){
   return(ADNS_read(0x05));
 }
 
-void pixel_grab(){
+void pixel_write(){
   //address = 0x0b
   int xcount=0;
   int count=0;
   
   //reset the pixel grab counter
   ADNS_write(0x0B,0x00);
-
-  Serial.println("");  
+  
   for (count=0;count < 225; count++){
-    if (count%15 == 14){
-      Serial.println(String(ADNS_read(0x0B)));
-    }
-    else{
-      Serial.print(String(ADNS_read(0x0B)) + ",");
-    }
+    Serial.println(String(ADNS_read(0x0B)));
   }
-  Serial.println("");
 }
 
 void ADNS_write(unsigned int address, unsigned int data){
