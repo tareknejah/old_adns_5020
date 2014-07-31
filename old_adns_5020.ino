@@ -59,36 +59,24 @@ void loop(){
           So I added this block of code which gets it right
       */
               
-      //int8_t dx = convert_from_unsigned(dx_raw);
-      
+      uint8_t dx_raw = ADNS_read(0x03);
+      int8_t dx = int8_t(dx_raw);
       uint8_t dy_raw = ADNS_read(0x04);
       int8_t dy = int8_t(dy_raw);
-      //int8_t dy = convert_from_signed(dy_raw);
+      
+      uint8_t sq = squal();
       
       char buf[80];
-      sprintf(buf, "X: %d\tY: %d", dx, dy);
+      sprintf(buf, "X: %d\tY: %d\tSqual: %d", dx, dy, sq);
       Serial.println(buf);
+      
+      pixel_grab();
     }
     
   }
 }
 
 
-/*
-  conversion function to change unsigned bytes into signed int8_t's
-  based on two complement format in the unsigned byte.
-  See wikipedio for explantion of 2's complement conversion formula
-    http://en.wikipedia.org/wiki/Two%27s_complement#Converting_from_two.27s_complement_representation
-*/
-int8_t convert_from_unsigned(uint8_t input_byte) {
-  int8_t result = input_byte;
-  
-  if(bitRead(result, 7)) {  
-     result = -1 * (~result + 1);     
-  }
-  
-  return result;
-}
 
 unsigned int squal(){
   //squal is address 0x05
