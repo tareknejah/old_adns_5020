@@ -18,7 +18,7 @@ void setup(){
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   //start a serial port for debugging
-  Serial.begin(57600);
+  Serial.begin(19200);
   delay(1000);
   Serial.println("startup complete");
 }
